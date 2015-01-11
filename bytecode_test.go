@@ -3,6 +3,7 @@ package lua
 import (
 	"strings"
 	"testing"
+	"fmt"
 )
 
 func TestNumberAssignment(t *testing.T) {
@@ -92,7 +93,7 @@ func TestFunctionMultipliParamsCall(t *testing.T) {
 	}
 }
 
-func TestSoleReturn(t *testing.T) {
+func TestSingleReturn(t *testing.T) {
 	code := "return 123, 'agfda', 02"
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)

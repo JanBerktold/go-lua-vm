@@ -145,7 +145,6 @@ func CreateBytecode(tok []Token) *[]Statement {
 				if isAssignableTyp(tok[currentToken].typ) {
 					amount++
 					PushValue(&result, &currentStatement, tok[currentToken].real)
-
 					if currentToken+1 >= len(tok) || tok[currentToken+1].typ != language_token || tok[currentToken+1].value != "," {
 						break
 					} else {
