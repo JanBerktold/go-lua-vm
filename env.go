@@ -1,8 +1,8 @@
 package lua
 
 type Environment struct {
-	m map[string]interface{}
-	parent *Environment 
+	m      map[string]interface{}
+	parent *Environment
 }
 
 func (env *Environment) SearchValue(key string) interface{} {
@@ -15,4 +15,15 @@ func (env *Environment) SearchValue(key string) interface{} {
 		return env.parent.SearchValue(key)
 	}
 	return nil
+}
+
+func (env *Environment) SetValue(key string, value interface{}) {
+	env.m[key] = value
+}
+
+func NewEnv(parent *Environment) *Environment {
+	return &Environment{
+		make(map[string]interface{}),
+		parent,
+	}
 }

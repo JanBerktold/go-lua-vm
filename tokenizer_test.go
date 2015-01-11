@@ -70,7 +70,6 @@ func TestMultiParameterFunctionCallTokens(t *testing.T) {
 	}
 }
 
-
 func TestVariableAssignmentToken(t *testing.T) {
 
 	code := "local x = 25432125"

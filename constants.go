@@ -25,8 +25,8 @@ var (
 	keywordMap = sliceToMap(keywords)
 
 	scopeStart = []string{"do", "elseif", "for", "function", "repeat", "while"}
-	scopeMap = sliceToMap(scopeStart)
-	
+	scopeMap   = sliceToMap(scopeStart)
+
 	// LANGUAGE TOKENS
 	// NOTE: All tokens have to be sorted after their length, starting with the longest one
 	tokens = []string{"...", "..", "==", "~=", "<=", ">=", "+", "-", "*", "/", "%", "^", "#", "<", ">", "=", "(", ")", "{", "}", "[", "]", ";", ":", ",", "."}

@@ -14,6 +14,7 @@ import (
 type Token struct {
 	typ   int
 	value string
+	real  interface{}
 	line  int
 }
 
@@ -95,7 +96,7 @@ func Tokenize(code io.Reader) []Token {
 		if isRuneToken, isCompleted := isToken(runeToAscii(readRune)); isRuneToken {
 
 			if isCompleted {
-				result[tokenNum] = Token{language_token, runeToAscii(readRune), line}
+				result[tokenNum] = Token{language_token, runeToAscii(readRune), runeToAscii(readRune), line}
 				tokenNum++
 				continue
 			}
@@ -124,7 +125,7 @@ func Tokenize(code io.Reader) []Token {
 				}
 			}
 
-			result[tokenNum] = Token{language_token, strings.TrimSpace(buffer.String()), line}
+			result[tokenNum] = Token{language_token, strings.TrimSpace(buffer.String()), strings.TrimSpace(buffer.String()), line}
 			tokenNum++
 			continue
 		}
@@ -135,7 +136,7 @@ func Tokenize(code io.Reader) []Token {
 				return r != readRune
 			})
 
-			result[tokenNum] = Token{string_token, str, line}
+			result[tokenNum] = Token{string_token, str, str, line}
 			tokenNum++
 			continue
 		}
@@ -147,7 +148,7 @@ func Tokenize(code io.Reader) []Token {
 			})
 			savedRune = true
 
-			token := Token{0, str, line}
+			token := Token{0, str, str, line}
 
 			if isKeyword(str) {
 				token.typ = keyword_token
@@ -167,7 +168,8 @@ func Tokenize(code io.Reader) []Token {
 			})
 			savedRune = true
 
-			result[tokenNum] = Token{number_token, str, line}
+			parsedFloat, _ := strconv.ParseFloat(str, 64)
+			result[tokenNum] = Token{number_token, str, parsedFloat, line}
 			tokenNum++
 			continue
 		}
