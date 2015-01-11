@@ -1,9 +1,9 @@
 package lua
 
 import (
-	"testing"
 	"fmt"
 	"strings"
+	"testing"
 )
 
 func compareTokens(first, second []Token) bool {
@@ -34,12 +34,12 @@ func TestBasic(t *testing.T) {
     
     print("enter a number:")`
 
-    tokens := Tokenize(strings.NewReader(code))
+	tokens := Tokenize(strings.NewReader(code))
 	printTokens(tokens)
- 
-    if (!compareTokens(tokens, tokens)) {
-    	t.Fail()
-    }
+
+	if !compareTokens(tokens, tokens) {
+		t.Fail()
+	}
 
 }
 
@@ -47,9 +47,9 @@ func TestFunctionCall(t *testing.T) {
 
 	code := `print("Hello world")`
 
-    tokens := Tokenize(strings.NewReader(code))
+	tokens := Tokenize(strings.NewReader(code))
 	printTokens(tokens)
- 
+
 	if len(tokens) != 4 {
 		t.Fail()
 	}

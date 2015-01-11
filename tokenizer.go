@@ -5,15 +5,15 @@ package lua
 // - Fix language tokens
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"strconv"
-	"bytes"
 	"unicode"
-	"fmt"
 )
 
 type Token struct {
-	typ int
+	typ   int
 	value string
 }
 
@@ -27,15 +27,15 @@ func isKeyword(s string) bool {
 	return keywordMap[s]
 }
 
-func RuneToAscii(r rune) string {
-    if r < 128 {
-        return string(r)
-    } else {
-        return "\\u" + strconv.FormatInt(int64(r), 16)
-    }
+func runeToAscii(r rune) string {
+	if r < 128 {
+		return string(r)
+	} else {
+		return "\\u" + strconv.FormatInt(int64(r), 16)
+	}
 }
 
-func ReadUntil(reader *io.RuneReader, start string, fn continueReading) (string, rune) {
+func readUntil(reader *io.RuneReader, start string, fn continueReading) (string, rune) {
 	buffer := bytes.NewBufferString(start)
 
 	for {
@@ -48,7 +48,7 @@ func ReadUntil(reader *io.RuneReader, start string, fn continueReading) (string,
 	}
 }
 
-func IsToken(s string) (bool, bool) {
+func isToken(s string) (bool, bool) {
 	for _, token := range tokens {
 		if len(s) <= len(token) && token[0:len(s)] == s {
 			return true, len(s) == len(token)
@@ -60,10 +60,10 @@ func IsToken(s string) (bool, bool) {
 func Tokenize(code io.Reader) []Token {
 	runeReader := code.(io.RuneReader)
 
- 	result := make([]Token, 100, 1000)
- 	tokenNum := 0
+	result := make([]Token, 100, 1000)
+	tokenNum := 0
 
- 	var savedRune bool
+	var savedRune bool
 
 	for {
 		var readRune rune
@@ -86,10 +86,10 @@ func Tokenize(code io.Reader) []Token {
 		}
 
 		// language tokens
-		if isToken, isCompleted := IsToken(RuneToAscii(readRune)); isToken {
+		if isRuneToken, isCompleted := isToken(runeToAscii(readRune)); isRuneToken {
 
 			if isCompleted {
-				result[tokenNum] = Token{language_token, RuneToAscii(readRune)}
+				result[tokenNum] = Token{language_token, runeToAscii(readRune)}
 				tokenNum++
 				continue
 			}
@@ -101,7 +101,7 @@ func Tokenize(code io.Reader) []Token {
 				newRune, _, runeErr := runeReader.ReadRune()
 				if !isCompleted && runeErr == nil {
 					buffer.WriteRune(newRune)
-					if _, newCompleted := IsToken(buffer.String()); newCompleted {
+					if _, newCompleted := isToken(buffer.String()); newCompleted {
 						break
 					}
 				} else {
@@ -120,7 +120,7 @@ func Tokenize(code io.Reader) []Token {
 
 		// string
 		if readRune == 34 || readRune == 39 {
-			str, readRune = ReadUntil(&runeReader, "", func(r rune) bool {
+			str, readRune = readUntil(&runeReader, "", func(r rune) bool {
 				return r != readRune
 			})
 
@@ -131,12 +131,11 @@ func Tokenize(code io.Reader) []Token {
 
 		// any non-number identifer
 		if !unicode.IsDigit(readRune) {
-			str, readRune = ReadUntil(&runeReader, RuneToAscii(readRune), func(r rune) bool {
+			str, readRune = readUntil(&runeReader, runeToAscii(readRune), func(r rune) bool {
 				return unicode.IsNumber(r) || unicode.IsLetter(r)
 			})
 
-			fmt.Println("MISSED RUNE: " + RuneToAscii(readRune))
-
+			fmt.Println("MISSED RUNE: " + runeToAscii(readRune))
 
 			token := Token{0, str}
 
@@ -153,17 +152,17 @@ func Tokenize(code io.Reader) []Token {
 
 		// numbers
 		if unicode.IsDigit(readRune) {
-			str, readRune = ReadUntil(&runeReader, RuneToAscii(readRune), func(r rune) bool {
+			str, readRune = readUntil(&runeReader, runeToAscii(readRune), func(r rune) bool {
 				return unicode.IsDigit(r) || r == 46
 			})
 			savedRune = true
-		
+
 			result[tokenNum] = Token{number_token, str}
 			tokenNum++
 			continue
 		}
 
 	}
-	
+
 	return result[0:tokenNum]
 }

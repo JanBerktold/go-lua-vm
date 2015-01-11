@@ -6,7 +6,6 @@ import (
 )
 
 type VM struct {
-
 }
 
 func (v *VM) ExecuteString(code string) {
