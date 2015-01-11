@@ -1,12 +1,10 @@
 package lua
 
 // TODO:
-// - Fix bug where identifier is dropping the next rune
 // - Fix language tokens
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"strconv"
 	"unicode"
@@ -64,9 +62,9 @@ func Tokenize(code io.Reader) []Token {
 	tokenNum := 0
 
 	var savedRune bool
+	var readRune rune
 
 	for {
-		var readRune rune
 		var str string
 
 		if savedRune {
@@ -81,7 +79,7 @@ func Tokenize(code io.Reader) []Token {
 		}
 
 		// skip whitespace
-		if isWhiteSpace(readRune) {
+		if isWhiteSpace(readRune) || readRune == 0 {
 			continue
 		}
 
@@ -134,8 +132,7 @@ func Tokenize(code io.Reader) []Token {
 			str, readRune = readUntil(&runeReader, runeToAscii(readRune), func(r rune) bool {
 				return unicode.IsNumber(r) || unicode.IsLetter(r)
 			})
-
-			fmt.Println("MISSED RUNE: " + runeToAscii(readRune))
+			savedRune = true
 
 			token := Token{0, str}
 

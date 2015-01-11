@@ -35,7 +35,6 @@ func TestBasic(t *testing.T) {
     print("enter a number:")`
 
 	tokens := Tokenize(strings.NewReader(code))
-	printTokens(tokens)
 
 	if !compareTokens(tokens, tokens) {
 		t.Fail()
@@ -48,9 +47,25 @@ func TestFunctionCall(t *testing.T) {
 	code := `print("Hello world")`
 
 	tokens := Tokenize(strings.NewReader(code))
-	printTokens(tokens)
 
 	if len(tokens) != 4 {
+		t.Fail()
+	}
+}
+
+func TestMultiParameterFunctionCall(t *testing.T) {
+
+	code := `
+	function testy123(this, hopefully, works)
+		print(hopefully)
+	end
+
+	testy123("1gadg", 126, 'adgiodagu')
+	`
+
+	tokens := Tokenize(strings.NewReader(code))
+
+	if len(tokens) != 22 {
 		t.Fail()
 	}
 }
