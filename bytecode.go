@@ -3,6 +3,10 @@ package lua
 // File is responsible for taking a list of tokens and transforming it into a list of executable statements,
 // which will be passed towards the VM at execution stage. Bytecode is not compatible with other implementations.
 
+import (
+	"fmt"
+)
+
 type Statement interface {}
 
 type FunctionCall struct {
@@ -42,6 +46,24 @@ func getFuncEnd(tok *[]Token, n int) int {
 	return n
 }
 
+func getFuncParamEnd(tok *[]Token, n int) int {
+	level := 1
+	for level > 0 && n + 1< len(*tok) {
+		n++
+
+		if (*tok)[n].typ == keyword_token {
+
+			if (*tok)[n].value == ")" {
+				level--
+			} else if (*tok)[n].value == "(" {
+				level++
+			}
+		}
+
+	}
+	return n
+}
+
 func CreateBytecode(tok []Token) *[]Statement {
 	result := make([]Statement, 100, 1000)
 
@@ -50,6 +72,8 @@ func CreateBytecode(tok []Token) *[]Statement {
 
 	for currentToken < len(tok) {
 		token := tok[currentToken]
+
+
 
 		if token.typ == identifier_token && tok[currentToken + 1].value == "=" {
 
@@ -79,9 +103,34 @@ func CreateBytecode(tok []Token) *[]Statement {
 
 			}
 
+			continue
 		}
 
-		
+		// Function 
+		if token.typ == identifier_token && tok[currentToken + 1].value == "(" {
+			paramEnd := getFuncParamEnd(&tok, currentToken + 1)
+
+			if currentToken - 1 > 0 && tok[currentToken - 1].value == "function" {
+				// Assignment
+				funcEnd := getFuncEnd(&tok, currentToken + 1)
+				statment := VariableAssignment{token.value, CreateBytecode(tok[paramEnd+1:funcEnd-1]), false}
+
+				if currentToken > 0 {
+					statment.local = tok[currentToken - 1].typ == keyword_token && tok[currentToken - 1].value == "local"
+				}
+
+				result[currentStatement] = statment
+				currentStatement++
+				currentToken = funcEnd + 1
+			} else {
+				// Call
+
+				statment := FunctionCall{token.value, 2}
+
+			}
+
+		}
+
 
 		currentToken++
 	}

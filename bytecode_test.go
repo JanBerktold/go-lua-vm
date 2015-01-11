@@ -70,3 +70,27 @@ func TestFunctionAssignment(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFunctionCall(t *testing.T) {
+
+	code := "print('hello')"
+	tokens := Tokenize(strings.NewReader(code))
+	statements := CreateBytecode(tokens)
+	
+		fmt.Println(statements)
+	if len(*statements) != 1 {
+		t.Fail()
+	}
+}
+
+func TestFunctionMultipliParamsCall(t *testing.T) {
+
+	code := "print('hello', 123, 'hi', 25.02)"
+	tokens := Tokenize(strings.NewReader(code))
+	statements := CreateBytecode(tokens)
+	
+
+	if len(*statements) != 1 {
+		t.Fail()
+	}
+}

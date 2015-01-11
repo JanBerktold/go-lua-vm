@@ -42,7 +42,7 @@ func TestBasic(t *testing.T) {
 
 }
 
-func TestFunctionCall(t *testing.T) {
+func TestFunctionCallTokens(t *testing.T) {
 
 	code := `print("Hello world")`
 
@@ -53,7 +53,7 @@ func TestFunctionCall(t *testing.T) {
 	}
 }
 
-func TestMultiParameterFunctionCall(t *testing.T) {
+func TestMultiParameterFunctionCallTokens(t *testing.T) {
 
 	code := `
 	function testy123(this, hopefully, works)
