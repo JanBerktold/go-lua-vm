@@ -6,6 +6,11 @@ import (
 )
 
 type VM struct {
+
+}
+
+type Process struct {
+	globalEnv *Environment
 }
 
 func (v *VM) ExecuteString(code string) {

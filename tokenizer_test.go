@@ -17,7 +17,7 @@ func compareTokens(first, second []Token) bool {
 
 func printTokens(first []Token) {
 	for _, token := range first {
-		fmt.Printf("[%10v, %s]\n", tokenMapping[token.typ], token.value)
+		fmt.Printf("[%10v, %4v, %s]\n", tokenMapping[token.typ], token.line, token.value)
 	}
 }
 
@@ -66,6 +66,17 @@ func TestMultiParameterFunctionCall(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 
 	if len(tokens) != 22 {
+		t.Fail()
+	}
+}
+
+
+func TestVariableAssignmentToken(t *testing.T) {
+
+	code := "local x = 25432125"
+	tokens := Tokenize(strings.NewReader(code))
+
+	if len(tokens) != 4 {
 		t.Fail()
 	}
 }

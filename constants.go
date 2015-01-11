@@ -12,8 +12,8 @@ const (
 
 	// TOKEN TYPES
 	keyword_token = iota
-	identifier_token
 	language_token
+	identifier_token
 	string_token
 	number_token
 )
@@ -24,8 +24,12 @@ var (
 	keywords   = []string{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
 	keywordMap = sliceToMap(keywords)
 
+	scopeStart = []string{"do", "elseif", "for", "function", "repeat", "while"}
+	scopeMap = sliceToMap(scopeStart)
+	
 	// LANGUAGE TOKENS
-	tokens = []string{"+", "-", "*", "/", "%", "^", "#", "==", "~=", "<=", ">=", "<", ">", "=", "(", ")", "{", "}", "[", "]", ";", ":", ",", ".", "..", "..."}
+	// NOTE: All tokens have to be sorted after their length, starting with the longest one
+	tokens = []string{"...", "..", "==", "~=", "<=", ">=", "+", "-", "*", "/", "%", "^", "#", "<", ">", "=", "(", ")", "{", "}", "[", "]", ";", ":", ",", "."}
 
 	// DEBUGGING
 	tokenMapping = map[int]string{

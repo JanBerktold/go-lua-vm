@@ -7,12 +7,14 @@ import (
 	"bytes"
 	"io"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
 type Token struct {
 	typ   int
 	value string
+	line  int
 }
 
 type continueReading func(rune) bool
@@ -63,6 +65,7 @@ func Tokenize(code io.Reader) []Token {
 
 	var savedRune bool
 	var readRune rune
+	var line int
 
 	for {
 		var str string
@@ -78,6 +81,11 @@ func Tokenize(code io.Reader) []Token {
 			}
 		}
 
+		// increase line counter
+		if readRune == '\n' {
+			line++
+		}
+
 		// skip whitespace
 		if isWhiteSpace(readRune) || readRune == 0 {
 			continue
@@ -87,7 +95,7 @@ func Tokenize(code io.Reader) []Token {
 		if isRuneToken, isCompleted := isToken(runeToAscii(readRune)); isRuneToken {
 
 			if isCompleted {
-				result[tokenNum] = Token{language_token, runeToAscii(readRune)}
+				result[tokenNum] = Token{language_token, runeToAscii(readRune), line}
 				tokenNum++
 				continue
 			}
@@ -99,9 +107,14 @@ func Tokenize(code io.Reader) []Token {
 				newRune, _, runeErr := runeReader.ReadRune()
 				if !isCompleted && runeErr == nil {
 					buffer.WriteRune(newRune)
-					if _, newCompleted := isToken(buffer.String()); newCompleted {
+					stillToken, newCompleted := isToken(buffer.String())
+					if newCompleted {
+						break
+					} else if !stillToken {
+						buffer.UnreadRune()
 						break
 					}
+
 				} else {
 					if runeErr == nil {
 						savedRune = true
@@ -111,7 +124,7 @@ func Tokenize(code io.Reader) []Token {
 				}
 			}
 
-			result[tokenNum] = Token{language_token, buffer.String()}
+			result[tokenNum] = Token{language_token, strings.TrimSpace(buffer.String()), line}
 			tokenNum++
 			continue
 		}
@@ -122,7 +135,7 @@ func Tokenize(code io.Reader) []Token {
 				return r != readRune
 			})
 
-			result[tokenNum] = Token{string_token, str}
+			result[tokenNum] = Token{string_token, str, line}
 			tokenNum++
 			continue
 		}
@@ -134,7 +147,7 @@ func Tokenize(code io.Reader) []Token {
 			})
 			savedRune = true
 
-			token := Token{0, str}
+			token := Token{0, str, line}
 
 			if isKeyword(str) {
 				token.typ = keyword_token
@@ -154,7 +167,7 @@ func Tokenize(code io.Reader) []Token {
 			})
 			savedRune = true
 
-			result[tokenNum] = Token{number_token, str}
+			result[tokenNum] = Token{number_token, str, line}
 			tokenNum++
 			continue
 		}
