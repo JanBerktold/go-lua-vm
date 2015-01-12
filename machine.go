@@ -12,6 +12,7 @@ type VM struct {
 
 type Process struct {
 	localEnv *Environment
+	stack    *Stack
 	running  bool
 }
 
@@ -48,6 +49,7 @@ func (v *VM) executeTokens(tokens []Token) {
 func (v *VM) newProcess() *Process {
 	return &Process{
 		NewEnv(v.globalEnv),
+		NewStack(),
 		false,
 	}
 }
@@ -66,10 +68,12 @@ func (vm *VM) executeInstructions(instructions *[]Statement) {
 		switch v := instruc.(type) {
 		case VariableAssignment:
 			if v.local {
-				currentEnvironment.SetValue(v.name, nil)
+				currentEnvironment.SetValue(v.name, proc.stack.Pop())
 			} else {
-				vm.globalEnv.SetValue(v.name, nil)
+				vm.globalEnv.SetValue(v.name, proc.stack.Pop())
 			}
+		case PushValueStack:
+			proc.stack.Push(v.value)
 		default:
 			fmt.Println("INVALID INSTRUCTION")
 			os.Exit(1)

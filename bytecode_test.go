@@ -1,10 +1,17 @@
 package lua
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
-	"fmt"
 )
+
+func printStatements(st *[]Statement) {
+	for _, stat := range *st {
+		fmt.Printf("%v, %v\n", reflect.TypeOf(stat), stat)
+	}
+}
 
 func TestNumberAssignment(t *testing.T) {
 
@@ -12,14 +19,20 @@ func TestNumberAssignment(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-	fmt.Println(statements)
-
 	if len(*statements) != 1 {
 		t.FailNow()
 	}
 
+}
 
+func TestNumberAddition(t *testing.T) {
+	code := "local x = 25432125 + 21 + 50 + 46 + 8"
+	tokens := Tokenize(strings.NewReader(code))
+	statements := CreateBytecode(tokens)
 
+	if len(*statements) != 4 {
+		t.FailNow()
+	}
 }
 
 func TestStringAssignment(t *testing.T) {
@@ -28,12 +41,21 @@ func TestStringAssignment(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-
-
 	if len(*statements) != 1 {
 		t.FailNow()
 	}
 
+}
+
+func TestTableLengthArithmethic(t *testing.T) {
+
+	code := "x = #testaobd + 21"
+	tokens := Tokenize(strings.NewReader(code))
+	statements := CreateBytecode(tokens)
+
+	if len(*statements) != 1 {
+		t.FailNow()
+	}
 
 }
 

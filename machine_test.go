@@ -9,7 +9,7 @@ func TestNumberVariableRetrievement(t *testing.T) {
 	vm.ExecuteString(`x = 10`)
 
 	if i, suceed := vm.GetGlobalVariable("x").(float64); !suceed || i != 10 {
-		t.Fail()
+		t.Fatal("Number variable could not be retrieved")
 	}
 }
 
@@ -18,7 +18,7 @@ func TestStringVariableRetrievement(t *testing.T) {
 	vm.ExecuteString(`x = "abcadoi 35235 0123/39#'+"`)
 
 	if i, suceed := vm.GetGlobalVariable("x").(string); !suceed || i != "abcadoi 35235 0123/39#'+" {
-		t.Fail()
+		t.Fatal("String variable could not be retrieved")
 	}
 }
 
@@ -27,6 +27,6 @@ func TestLocalVariableRetrievement(t *testing.T) {
 	vm.ExecuteString(`local x = 134315654`)
 
 	if value := vm.GetGlobalVariable("x"); value != nil {
-		t.Fail()
+		t.Fatal("Variable could be retrieved even though declared as local")
 	}
 }

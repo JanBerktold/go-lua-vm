@@ -5,7 +5,6 @@ package lua
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type Statement interface{}
@@ -38,8 +37,7 @@ type AddOperation struct {
 type SubOperation struct {
 }
 
-func isAssignableTyp(t int) bool {
-	return t >= identifier_token
+type TableLengthOperation struct {
 }
 
 func getFuncEnd(tok *[]Token, n int) int {
@@ -78,39 +76,37 @@ func getFuncParamEnd(tok *[]Token, n int) int {
 	return n
 }
 
-func PushValue(tar *[]Statement, counter *int, value interface{}) {
-	(*tar)[*counter] = PushValueStack{
-		value,
+func AddStatement(tar *[]Statement, counter *int, stat Statement) {
+	for (*tar)[*counter] != nil {
+		(*counter)++
 	}
+	(*tar)[*counter] = stat
 	(*counter)++
+}
+
+func PushValue(tar *[]Statement, counter *int, value interface{}) {
+	AddStatement(tar, counter, PushValueStack{
+		value,
+	})
 }
 
 func PushVariable(tar *[]Statement, counter *int, name string) {
-	(*tar)[*counter] = PushVariableStack{
+	AddStatement(tar, counter, PushVariableStack{
 		name,
-	}
-	(*counter)++
+	})
 }
 
 func VariableAssign(tar *[]Statement, counter *int, name string, local bool) {
-	(*tar)[*counter] = VariableAssignment{
+	AddStatement(tar, counter, VariableAssignment{
 		name,
 		local,
-	}
-	(*counter)++
-}
-
-func AddStatement(tar *[]Statement, counter *int, value interface{}) {
-	typBefore1 := reflect.TypeOf((*tar)[*counter - 1])
-	fmt.Println(typBefore1)
-
-	(*tar)[*counter] = value
-	(*counter)++
+	})
 }
 
 func EvaluateStatement(tar *[]Statement, counter *int, tok []Token) (endAt int) {
 	count := 0
 	lastType := -1
+	firstArith := true
 	for count < len(tok) {
 
 		switch tok[count].typ {
@@ -118,9 +114,20 @@ func EvaluateStatement(tar *[]Statement, counter *int, tok []Token) (endAt int) 
 			var stat Statement
 
 			if tok[count].value == "+" {
-				stat = AddOperation{}
+				if firstArith {
+					fmt.Println("RESET")
+					(*counter)++
+				}
+				AddStatement(tar, counter, AddOperation{})
+				if firstArith {
+					firstArith = false
+					(*counter)--
+					(*counter)--
+				}
 			} else if tok[count].value == "-" {
 				stat = SubOperation{}
+			} else if tok[count].value == "#" {
+				stat = TableLengthOperation{}
 			}
 
 			if stat != nil {
@@ -153,10 +160,9 @@ func CreateBytecode(tok []Token) *[]Statement {
 	for currentToken < len(tok) {
 		token := tok[currentToken]
 
-
 		if token.typ == language_token && token.value == "=" {
-			EvaluateStatement(&result, &currentStatement, tok[currentToken + 1:len(tok)])
-			VariableAssign(&result, &currentStatement, tok[currentToken - 1].value, false)
+			EvaluateStatement(&result, &currentStatement, tok[currentToken+1:len(tok)])
+			VariableAssign(&result, &currentStatement, tok[currentToken-1].value, currentToken - 2 >= 0 && tok[currentToken - 2].value == "local")
 		}
 
 		currentToken++
