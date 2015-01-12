@@ -8,28 +8,17 @@ import (
 
 func TestNumberAssignment(t *testing.T) {
 
-	code := "local x = 25432125"
+	code := "local x = 25432125 + 21"
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
+	fmt.Println(statements)
+
 	if len(*statements) != 1 {
-		t.Fail()
+		t.FailNow()
 	}
 
-	if stat, suceed := (*statements)[0].(VariableAssignment); suceed {
-		if stat.name != "x" || !stat.local {
-			t.Fail()
-		}
-		if n, succeedNumber := stat.value.(float64); succeedNumber {
-			if n != 25432125 {
-				t.Fail()
-			}
-		} else {
-			t.Fail()
-		}
-	} else {
-		t.Fail()
-	}
+
 
 }
 
@@ -39,24 +28,12 @@ func TestStringAssignment(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
+
+
 	if len(*statements) != 1 {
-		t.Fail()
+		t.FailNow()
 	}
 
-	if stat, suceed := (*statements)[0].(VariableAssignment); suceed {
-		if stat.name != "x" || stat.local {
-			t.Fail()
-		}
-		if n, succeedNumber := stat.value.(string); succeedNumber {
-			if n != "hello there123" {
-				t.Fail()
-			}
-		} else {
-			t.Fail()
-		}
-	} else {
-		t.Fail()
-	}
 
 }
 
@@ -67,7 +44,7 @@ func TestFunctionAssignment(t *testing.T) {
 	statements := CreateBytecode(tokens)
 
 	if len(*statements) != 1 {
-		t.Fail()
+		t.FailNow()
 	}
 }
 
@@ -78,7 +55,7 @@ func TestFunctionCall(t *testing.T) {
 	statements := CreateBytecode(tokens)
 
 	if len(*statements) != 1 {
-		t.Fail()
+		t.FailNow()
 	}
 }
 
@@ -89,7 +66,7 @@ func TestFunctionMultipliParamsCall(t *testing.T) {
 	statements := CreateBytecode(tokens)
 
 	if len(*statements) != 1 {
-		t.Fail()
+		t.FailNow()
 	}
 }
 
@@ -99,6 +76,6 @@ func TestSingleReturn(t *testing.T) {
 	statements := CreateBytecode(tokens)
 
 	if len(*statements) != 4 {
-		t.Fail()
+		t.FailNow()
 	}
 }

@@ -30,6 +30,10 @@ func (v *VM) GetGlobalVariable(key string) interface{} {
 	return v.globalEnv.SearchValue(key)
 }
 
+func (v *VM) SetGlobalVariable(key string, value interface{}) {
+	v.globalEnv.SetValue(key, value)
+}
+
 func New() *VM {
 	return &VM{
 		NewEnv(nil),
@@ -62,9 +66,9 @@ func (vm *VM) executeInstructions(instructions *[]Statement) {
 		switch v := instruc.(type) {
 		case VariableAssignment:
 			if v.local {
-				currentEnvironment.SetValue(v.name, v.value)
+				currentEnvironment.SetValue(v.name, nil)
 			} else {
-				vm.globalEnv.SetValue(v.name, v.value)
+				vm.globalEnv.SetValue(v.name, nil)
 			}
 		default:
 			fmt.Println("INVALID INSTRUCTION")

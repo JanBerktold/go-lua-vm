@@ -3,6 +3,11 @@ package lua
 // File is responsible for taking a list of tokens and transforming it into a list of executable statements,
 // which will be passed towards the VM at execution stage. Bytecode is not compatible with other implementations.
 
+import (
+	"fmt"
+	"reflect"
+)
+
 type Statement interface{}
 
 type FunctionCall struct {
@@ -12,16 +17,25 @@ type FunctionCall struct {
 
 type VariableAssignment struct {
 	name  string
-	value interface{}
 	local bool
 }
 
-type PushStack struct {
+type PushVariableStack struct {
+	name string
+}
+
+type PushValueStack struct {
 	value interface{}
 }
 
 type ReturnValue struct {
 	amount int
+}
+
+type AddOperation struct {
+}
+
+type SubOperation struct {
 }
 
 func isAssignableTyp(t int) bool {
@@ -65,10 +79,69 @@ func getFuncParamEnd(tok *[]Token, n int) int {
 }
 
 func PushValue(tar *[]Statement, counter *int, value interface{}) {
-	(*tar)[*counter] = PushStack{
+	(*tar)[*counter] = PushValueStack{
 		value,
 	}
 	(*counter)++
+}
+
+func PushVariable(tar *[]Statement, counter *int, name string) {
+	(*tar)[*counter] = PushVariableStack{
+		name,
+	}
+	(*counter)++
+}
+
+func VariableAssign(tar *[]Statement, counter *int, name string, local bool) {
+	(*tar)[*counter] = VariableAssignment{
+		name,
+		local,
+	}
+	(*counter)++
+}
+
+func AddStatement(tar *[]Statement, counter *int, value interface{}) {
+	typBefore1 := reflect.TypeOf((*tar)[*counter - 1])
+	fmt.Println(typBefore1)
+
+	(*tar)[*counter] = value
+	(*counter)++
+}
+
+func EvaluateStatement(tar *[]Statement, counter *int, tok []Token) (endAt int) {
+	count := 0
+	lastType := -1
+	for count < len(tok) {
+
+		switch tok[count].typ {
+		case language_token:
+			var stat Statement
+
+			if tok[count].value == "+" {
+				stat = AddOperation{}
+			} else if tok[count].value == "-" {
+				stat = SubOperation{}
+			}
+
+			if stat != nil {
+				AddStatement(tar, counter, stat)
+			}
+		case identifier_token:
+			if lastType >= identifier_token {
+				return count - 1
+			}
+			PushVariable(tar, counter, tok[count].value)
+		case number_token, string_token:
+			if lastType >= identifier_token {
+				return count - 1
+			}
+			PushValue(tar, counter, tok[count].real)
+		}
+
+		lastType = tok[count].typ
+		count++
+	}
+	return count
 }
 
 func CreateBytecode(tok []Token) *[]Statement {
@@ -80,85 +153,10 @@ func CreateBytecode(tok []Token) *[]Statement {
 	for currentToken < len(tok) {
 		token := tok[currentToken]
 
-		if token.typ == identifier_token && tok[currentToken+1].value == "=" {
 
-			// Special case, if we want to assign a function to the variable
-			if isAssignableTyp(tok[currentToken+2].typ) {
-				statment := VariableAssignment{token.value, tok[currentToken+2].real, false}
-
-				if currentToken > 0 {
-					statment.local = tok[currentToken-1].typ == keyword_token && tok[currentToken-1].value == "local"
-				}
-
-				result[currentStatement] = statment
-				currentStatement++
-				currentToken += 2
-			} else if tok[currentToken+2].typ == keyword_token && tok[currentToken+2].value == "function" {
-				// Assign a function
-				funcEnd := getFuncEnd(&tok, currentToken+2)
-				statment := VariableAssignment{token.value, CreateBytecode(tok[currentToken+3 : funcEnd-1]), false}
-
-				if currentToken > 0 {
-					statment.local = tok[currentToken-1].typ == keyword_token && tok[currentToken-1].value == "local"
-				}
-
-				result[currentStatement] = statment
-				currentStatement++
-				currentToken = funcEnd + 1
-
-			}
-
-			continue
-		}
-
-		// Function
-		if token.typ == identifier_token && tok[currentToken+1].value == "(" {
-			paramEnd := getFuncParamEnd(&tok, currentToken+1)
-
-			if currentToken-1 > 0 && tok[currentToken-1].value == "function" {
-				// Assignment
-				funcEnd := getFuncEnd(&tok, currentToken+1)
-				statment := VariableAssignment{token.value, CreateBytecode(tok[paramEnd+1 : funcEnd-1]), false}
-
-				if currentToken > 0 {
-					statment.local = tok[currentToken-1].typ == keyword_token && tok[currentToken-1].value == "local"
-				}
-
-				result[currentStatement] = statment
-				currentStatement++
-				currentToken = funcEnd + 1
-			} else {
-				// Call
-
-				//statment := FunctionCall{token.value, 2}
-
-			}
-
-		}
-
-		// RETURN STATEMENT
-		if token.typ == keyword_token && token.value == "return" {
-			amount := 0
-
-			for currentToken < len(tok) {
-				currentToken++
-				if isAssignableTyp(tok[currentToken].typ) {
-					amount++
-					PushValue(&result, &currentStatement, tok[currentToken].real)
-					if currentToken+1 >= len(tok) || tok[currentToken+1].typ != language_token || tok[currentToken+1].value != "," {
-						break
-					} else {
-						currentToken++
-					}
-				} else {
-					break
-				}
-			}
-
-			result[currentStatement] = ReturnValue{
-				amount,
-			}
-			currentStatement++
+		if token.typ == language_token && token.value == "=" {
+			EvaluateStatement(&result, &currentStatement, tok[currentToken + 1:len(tok)])
+			VariableAssign(&result, &currentStatement, tok[currentToken - 1].value, false)
 		}
 
 		currentToken++
