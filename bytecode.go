@@ -3,10 +3,6 @@ package lua
 // File is responsible for taking a list of tokens and transforming it into a list of executable statements,
 // which will be passed towards the VM at execution stage. Bytecode is not compatible with other implementations.
 
-import (
-	"fmt"
-)
-
 type Statement interface{}
 
 type FunctionCall struct {
@@ -35,6 +31,12 @@ type AddOperation struct {
 }
 
 type SubOperation struct {
+}
+
+type MulOperation struct {
+}
+
+type DivOperation struct {
 }
 
 type TableLengthOperation struct {
@@ -103,50 +105,54 @@ func VariableAssign(tar *[]Statement, counter *int, name string, local bool) {
 	})
 }
 
-func EvaluateStatement(tar *[]Statement, counter *int, tok []Token) (endAt int) {
-	count := 0
-	lastType := -1
-	firstArith := true
-	for count < len(tok) {
+func EvaluateStatement(tar *[]Statement, counter *int, tok []Token, count, lastType int) (int, bool, int) {
+	switch tok[count].typ {
+	case language_token:
+		var stat Statement
 
-		switch tok[count].typ {
-		case language_token:
-			var stat Statement
-
-			if tok[count].value == "+" {
-				if firstArith {
-					fmt.Println("RESET")
-					(*counter)++
-				}
-				AddStatement(tar, counter, AddOperation{})
-				if firstArith {
-					firstArith = false
-					(*counter)--
-					(*counter)--
-				}
-			} else if tok[count].value == "-" {
-				stat = SubOperation{}
-			} else if tok[count].value == "#" {
-				stat = TableLengthOperation{}
-			}
-
-			if stat != nil {
-				AddStatement(tar, counter, stat)
-			}
-		case identifier_token:
-			if lastType >= identifier_token {
-				return count - 1
-			}
-			PushVariable(tar, counter, tok[count].value)
-		case number_token, string_token:
-			if lastType >= identifier_token {
-				return count - 1
-			}
-			PushValue(tar, counter, tok[count].real)
+		if tok[count].value == "+" {
+			stat = AddOperation{}
+		} else if tok[count].value == "-" {
+			stat = SubOperation{}
+		} else if tok[count].value == "*" {
+			stat = MulOperation{}
+		} else if tok[count].value == "/" {
+			stat = DivOperation{}
+		} else if tok[count].value == "#" {
+			stat = TableLengthOperation{}
 		}
 
-		lastType = tok[count].typ
-		count++
+		if stat != nil {
+			if tok[count+1].typ >= identifier_token {
+				EvaluateStatement(tar, counter, tok, count+1, tok[count].typ)
+			}
+			AddStatement(tar, counter, stat)
+			return tok[count].typ, false, count + 2
+		}
+	case identifier_token:
+		if lastType >= identifier_token {
+			return tok[count].typ, true, count + 1
+		}
+		PushVariable(tar, counter, tok[count].value)
+	case number_token, string_token:
+		if lastType >= identifier_token {
+			return tok[count].typ, true, count + 1
+		}
+		PushValue(tar, counter, tok[count].real)
+	}
+
+	return tok[count].typ, false, count + 1
+}
+
+func EvaluateStatements(tar *[]Statement, counter *int, tok []Token) (endAt int) {
+	count := 0
+	lastType := 0
+	suceed := false
+	for count < len(tok) {
+		lastType, suceed, count = EvaluateStatement(tar, counter, tok, count, lastType)
+		if suceed {
+			return count
+		}
 	}
 	return count
 }
@@ -161,8 +167,8 @@ func CreateBytecode(tok []Token) *[]Statement {
 		token := tok[currentToken]
 
 		if token.typ == language_token && token.value == "=" {
-			EvaluateStatement(&result, &currentStatement, tok[currentToken+1:len(tok)])
-			VariableAssign(&result, &currentStatement, tok[currentToken-1].value, currentToken - 2 >= 0 && tok[currentToken - 2].value == "local")
+			EvaluateStatements(&result, &currentStatement, tok[currentToken+1:len(tok)])
+			VariableAssign(&result, &currentStatement, tok[currentToken-1].value, currentToken-2 >= 0 && tok[currentToken-2].value == "local")
 		}
 
 		currentToken++

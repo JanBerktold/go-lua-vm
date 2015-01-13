@@ -3,6 +3,7 @@ package lua
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -54,7 +55,7 @@ func (v *VM) newProcess() *Process {
 	}
 }
 
-func (vm *VM) executeInstructions(instructions *[]Statement) {
+func (vm *VM) executeInstructions(instructions *[]Statement) interface{} {
 	proc := vm.newProcess()
 	proc.running = true
 	currentEnvironment := proc.localEnv
@@ -62,7 +63,7 @@ func (vm *VM) executeInstructions(instructions *[]Statement) {
 	for _, instruc := range *instructions {
 
 		if !proc.running {
-			return
+			return nil
 		}
 
 		switch v := instruc.(type) {
@@ -74,10 +75,26 @@ func (vm *VM) executeInstructions(instructions *[]Statement) {
 			}
 		case PushValueStack:
 			proc.stack.Push(v.value)
+		case ReturnValue:
+			if currentEnvironment == proc.localEnv {
+				return proc.stack.Pop()
+			}
+		case AddOperation:
+			proc.stack.Push(proc.stack.PopFloat64() + proc.stack.PopFloat64())
+		case SubOperation:
+			secondNum := proc.stack.PopFloat64()
+			firstNum := proc.stack.PopFloat64()
+			proc.stack.Push(firstNum - secondNum)
+		case MulOperation:
+			proc.stack.Push(proc.stack.PopFloat64() * proc.stack.PopFloat64())
+		case DivOperation:
+			secondNum := proc.stack.PopFloat64()
+			firstNum := proc.stack.PopFloat64()
+			proc.stack.Push(firstNum / secondNum)
 		default:
-			fmt.Println("INVALID INSTRUCTION")
-			os.Exit(1)
+			fmt.Printf("INVALID INSTRUCTION %v\n", reflect.TypeOf(v))
 		}
 	}
 
+	return nil
 }

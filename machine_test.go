@@ -4,13 +4,31 @@ import (
 	"testing"
 )
 
-func TestNumberVariableRetrievement(t *testing.T) {
-	vm := New()
-	vm.ExecuteString(`x = 10`)
+type ArithmeticTest struct {
+	equation string
+	result   float64
+}
 
-	if i, suceed := vm.GetGlobalVariable("x").(float64); !suceed || i != 10 {
-		t.Fatal("Number variable could not be retrieved")
+func TestArithmeticRetrievement(t *testing.T) {
+	vm := New()
+
+	tests := []ArithmeticTest{
+		ArithmeticTest{`x = 10`, 10},
+		ArithmeticTest{`x = 50 * 2 + 21`, 121},
+		ArithmeticTest{`x = 2 + 21 + 50 + 46 + 8`, 127},
+		ArithmeticTest{`x = 50 - 54 + 98 - 2`, 92},
+		ArithmeticTest{`x = 50 / 10`, 5},
+		ArithmeticTest{`x = 50 / 10 + 2.21`, 7.21},
+		ArithmeticTest{`x = 50 / 10 *10`, 50},
 	}
+
+	for _, test := range tests {
+		vm.ExecuteString(test.equation)
+		if i, suceed := vm.GetGlobalVariable("x").(float64); !suceed || i != test.result {
+			t.Fatalf("Number variable of equation %q could not be retrieved or wrong value. \nExpected: %v. Recieved: %v\n", test.equation, test.result, i)
+		}
+	}
+
 }
 
 func TestStringVariableRetrievement(t *testing.T) {

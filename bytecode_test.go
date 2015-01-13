@@ -19,7 +19,7 @@ func TestNumberAssignment(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-	if len(*statements) != 1 {
+	if len(*statements) != 4 {
 		t.FailNow()
 	}
 
@@ -30,7 +30,7 @@ func TestNumberAddition(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-	if len(*statements) != 4 {
+	if len(*statements) != 10 {
 		t.FailNow()
 	}
 }
@@ -41,7 +41,7 @@ func TestStringAssignment(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-	if len(*statements) != 1 {
+	if len(*statements) != 2 {
 		t.FailNow()
 	}
 

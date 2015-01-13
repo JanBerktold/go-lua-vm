@@ -1,5 +1,9 @@
 package lua
 
+import (
+	"fmt"
+)
+
 type Stack struct {
 	top  *Element
 	size int
@@ -30,6 +34,15 @@ func (s *Stack) Pop() (value interface{}) {
 		return
 	}
 	return nil
+}
+
+func (s *Stack) PopFloat64() float64 {
+	if num, suceed := s.Pop().(float64); suceed {
+		return num
+	} else {
+		fmt.Println("Attempt to retrieve a non-existent float64 from the stack")
+		return 0
+	}
 }
 
 func NewStack() *Stack {
