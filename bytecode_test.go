@@ -7,88 +7,37 @@ import (
 	"testing"
 )
 
+type StatmentTest struct {
+	code string
+	result int
+	print bool
+}
+
 func printStatements(st *[]Statement) {
 	for _, stat := range *st {
 		fmt.Printf("%v, %v\n", reflect.TypeOf(stat), stat)
 	}
 }
 
-func TestNumberAssignment(t *testing.T) {
-
-	code := "local x = 25432125 + 21"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 4 {
-		t.FailNow()
+func TestBasicStatments(t *testing.T) {
+	
+	tests := []StatmentTest{
+		StatmentTest{"local x = 25432125 + 21", 4, false },
+		StatmentTest{"local x = 25432125 + 21 + 50 + 46 + 8", 10, false },
+		StatmentTest{"x = 'hello there123'", 2, false },
+		StatmentTest{"x = #testaobd + 21", 5, false },
+		StatmentTest{"x = function() print('hello') end", 1, false },
+		StatmentTest{"print('hello')", 3, false },
+		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false },
+		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false },
 	}
-
-}
-
-func TestNumberAddition(t *testing.T) {
-	code := "local x = 25432125 + 21 + 50 + 46 + 8"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 10 {
-		t.FailNow()
-	}
-}
-
-func TestStringAssignment(t *testing.T) {
-
-	code := "x = 'hello there123'"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 2 {
-		t.FailNow()
-	}
-
-}
-
-func TestTableLengthArithmethic(t *testing.T) {
-
-	code := "x = #testaobd + 21"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 5 {
-		t.FailNow()
-	}
-
-}
-
-func TestFunctionAssignment(t *testing.T) {
-
-	code := "x = function() print('hello') end"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 1 {
-		t.FailNow()
-	}
-}
-
-func TestFunctionCall(t *testing.T) {
-
-	code := "print('hello')"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 1 {
-		t.FailNow()
-	}
-}
-
-func TestFunctionMultipliParamsCall(t *testing.T) {
-
-	code := "print('hello', 123, 'hi', 25.02)"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	if len(*statements) != 1 {
-		t.FailNow()
+	
+	for _, test := range tests {
+		tokens := Tokenize(strings.NewReader(test.code))
+		statements := CreateBytecode(tokens)
+		if len(*statements) != test.result {
+			t.FailNow()
+		}
 	}
 }
 
