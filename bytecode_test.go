@@ -53,8 +53,7 @@ func TestTableLengthArithmethic(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
-	printStatements(statements)
-	if len(*statements) != 1 {
+	if len(*statements) != 5 {
 		t.FailNow()
 	}
 
