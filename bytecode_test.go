@@ -36,7 +36,7 @@ func TestBasicStatments(t *testing.T) {
 		tokens := Tokenize(strings.NewReader(test.code))
 		statements := CreateBytecode(tokens)
 		if len(*statements) != test.result {
-			t.Errorf("Test %q failed. Got %v statments. Expected %v.", test.code, test.result, len(*statements))
+			t.Errorf("Test %q failed. Got %v statment(s). Expected %v.", test.code, test.result, len(*statements))
 		}
 	}
 }
