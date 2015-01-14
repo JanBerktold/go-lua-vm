@@ -15,7 +15,7 @@ type StatmentTest struct {
 
 func printStatements(t *testing.T, st *[]Statement) {
 	for _, stat := range *st {
-		fmt.Printf("%v, %v\n", reflect.TypeOf(stat), stat)
+		t.Logf("%v, %v\n", reflect.TypeOf(stat), stat)
 	}
 }
 
