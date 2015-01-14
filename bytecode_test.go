@@ -1,7 +1,6 @@
 package lua
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
