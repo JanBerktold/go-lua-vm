@@ -13,7 +13,7 @@ type StatmentTest struct {
 	print bool
 }
 
-func printStatements(st *[]Statement) {
+func printStatements(t *testing.T, st *[]Statement) {
 	for _, stat := range *st {
 		fmt.Printf("%v, %v\n", reflect.TypeOf(stat), stat)
 	}
@@ -37,6 +37,10 @@ func TestBasicStatments(t *testing.T) {
 		statements := CreateBytecode(tokens)
 		if len(*statements) != test.result {
 			t.Errorf("Test %q failed. Got %v statment(s). Expected %v.", test.code, test.result, len(*statements))
+		}
+		if len(*statements) != test.result || test.print {
+			t.Logf("Generated statements from code %q:", test.code)
+			printStatements(t, statements)
 		}
 	}
 }
