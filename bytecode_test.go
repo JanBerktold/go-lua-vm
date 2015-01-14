@@ -97,6 +97,7 @@ func TestSingleReturn(t *testing.T) {
 	tokens := Tokenize(strings.NewReader(code))
 	statements := CreateBytecode(tokens)
 
+	printStatements(statements)
 	if len(*statements) != 4 {
 		t.FailNow()
 	}
