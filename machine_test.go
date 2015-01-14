@@ -19,7 +19,10 @@ func TestArithmeticRetrievement(t *testing.T) {
 		ArithmeticTest{`x = 50 - 54 + 98 - 2`, 92},
 		ArithmeticTest{`x = 50 / 10`, 5},
 		ArithmeticTest{`x = 50 / 10 + 2.21`, 7.21},
-		ArithmeticTest{`x = 50 / 10 *10`, 50},
+		ArithmeticTest{`x = 50 / 10 * 10`, 50},
+		ArithmeticTest{`x = 2 * (20 + 10)`, 60},
+		ArithmeticTest{`x = 2 * 20 + 10`, 50},
+		ArithmeticTest{`y = 20 / 10 x = y * 2`, 4},
 	}
 
 	for _, test := range tests {

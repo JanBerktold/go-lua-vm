@@ -68,6 +68,7 @@ func (vm *VM) executeInstructions(instructions *[]Statement) interface{} {
 
 		switch v := instruc.(type) {
 		case VariableAssignment:
+			fmt.Printf("ASSIGN VARIABLE %v to %v\n", v.name, proc.stack.Peek())
 			if v.local {
 				currentEnvironment.SetValue(v.name, proc.stack.Pop())
 			} else {
@@ -75,6 +76,10 @@ func (vm *VM) executeInstructions(instructions *[]Statement) interface{} {
 			}
 		case PushValueStack:
 			proc.stack.Push(v.value)
+		case PushVariableStack:
+			fmt.Printf("PUSH VARAIBLE %v VALUE %v\n", v.name, currentEnvironment.SearchValue(v.name))
+
+			proc.stack.Push(currentEnvironment.SearchValue(v.name))
 		case ReturnValue:
 			if currentEnvironment == proc.localEnv {
 				return proc.stack.Pop()

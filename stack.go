@@ -36,6 +36,13 @@ func (s *Stack) Pop() (value interface{}) {
 	return nil
 }
 
+func (s *Stack) Peek() (value interface{}) {
+	if s.size > 0 {
+		return s.top.value
+	}
+	return nil
+}
+
 func (s *Stack) PopFloat64() float64 {
 	if num, suceed := s.Pop().(float64); suceed {
 		return num

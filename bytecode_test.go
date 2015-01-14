@@ -4,12 +4,13 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"fmt"
 )
 
 type StatmentTest struct {
-	code string
+	code   string
 	result int
-	print bool
+	print  bool
 }
 
 func printStatements(t *testing.T, st *[]Statement) {
@@ -19,21 +20,29 @@ func printStatements(t *testing.T, st *[]Statement) {
 }
 
 func TestBasicStatments(t *testing.T) {
-	
+
 	tests := []StatmentTest{
-		StatmentTest{"local x = 25432125 + 21", 4, false },
-		StatmentTest{"local x = 25432125 + 21 + 50 + 46 + 8", 10, false },
-		StatmentTest{"x = 'hello there123'", 2, false },
-		StatmentTest{"x = #testaobd + 21", 5, false },
-		StatmentTest{"x = function() print('hello') end", 1, false },
-		StatmentTest{"print('hello')", 3, false },
-		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false },
-		StatmentTest{"return 123, 'agfda', 02", 4, false },
+		StatmentTest{"local x = 25432125 + 21", 4, false},
+		StatmentTest{"local x = 25432125 + 21 + 50 + 46 + 8", 10, false},
+		StatmentTest{"x = 'hello there123'", 2, false},
+		StatmentTest{"x = #testaobd + 21", 5, false},
+		//StatmentTest{"x = function() print('hello') end", 1, false},
+		StatmentTest{"print('hello')", 3, false},
+		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false},
+		StatmentTest{"return 123, 'agfda', 02", 4, false},
+		StatmentTest{"local x = 2 * (20 + 10)", 6, false},
+		StatmentTest{"local x = 2 * 20 + 10", 6, false},
+		StatmentTest{"y = 20 / 10 x = y * 2", 6, false},
+
 	}
-	
+
+
 	for _, test := range tests {
 		tokens := Tokenize(strings.NewReader(test.code))
 		statements := CreateBytecode(tokens)
+		if test.print {
+			fmt.Printf("START HERE %v\n", test.code)
+		}
 		if len(*statements) != test.result {
 			t.Errorf("Test %q failed. Got %v statment(s). Expected %v.", test.code, len(*statements), test.result)
 		}
