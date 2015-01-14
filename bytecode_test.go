@@ -29,7 +29,7 @@ func TestBasicStatments(t *testing.T) {
 		StatmentTest{"x = function() print('hello') end", 1, false },
 		StatmentTest{"print('hello')", 3, false },
 		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false },
-		StatmentTest{"print('hello', 123, 'hi', 25.02)", 6, false },
+		StatmentTest{"return 123, 'agfda', 02", 4, false },
 	}
 	
 	for _, test := range tests {
@@ -38,16 +38,5 @@ func TestBasicStatments(t *testing.T) {
 		if len(*statements) != test.result {
 			t.Errorf("Test %q failed. Got %v statment(s). Expected %v.", test.code, test.result, len(*statements))
 		}
-	}
-}
-
-func TestSingleReturn(t *testing.T) {
-	code := "return 123, 'agfda', 02"
-	tokens := Tokenize(strings.NewReader(code))
-	statements := CreateBytecode(tokens)
-
-	printStatements(statements)
-	if len(*statements) != 4 {
-		t.FailNow()
 	}
 }
